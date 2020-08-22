@@ -16,3 +16,6 @@ body {
     cursor: none;
 }
 
+canvas {
+    background-color: rgb(255, 255, 255);
+}
