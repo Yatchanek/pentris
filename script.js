@@ -17,6 +17,7 @@ let elapsedTime = 0;
 let tickElapsedTime = 0;
 let grid = [];
 let fullLines = [];
+let keys = [];
 let tick = 0;
 let lastTick = 0;
 let speed = 1000;
@@ -25,20 +26,32 @@ let linesCount = 0;
 let fontSize;
 let score = 0;
 let level = 1;
-let gameState = 'playing';
-let nextState = 'playing';
+let gameState = 'loading';
+let nextState = 'loading';
 let keyHold = false;
 let gameTick = true;
 let hints = true;
 let advanceLevel = false;
+let resCount = 0;
 let blocks = new Image();
+let title = new Image();
+let cursor = new Image();
+let startButton = new Image();
+let textSheet = new Image();
+let mouseX;
+let mouseY;
+let phase = 0;
+
 blocks.src = './res/blocks.png';
-
-
-setup();
-pentomino.selectNewPiece();
-run = requestAnimationFrame(gameLoop)
-
+blocks.onload = assetLoader();
+title.src = './res/title.png';
+title.onload = assetLoader();
+cursor.src = './res/cursor.png';
+cursor.onload = assetLoader();
+startButton.src = './res/startbutton.png';
+startButton.onload = assetLoader();
+textSheet.src = './res/text.png';
+textSheet.onload = assetLoader();
 
 function setup() {
     wWidth = gameWindow.width = window.innerWidth;
@@ -50,10 +63,13 @@ function setup() {
     pentomino = new Pentomino(cellSize, Math.floor(wWidth / 2 - gameWidth / 2), Math.floor((wHeight - gameHeight) / 2));
     createGrid();
     ctx.font = `bold ${fontSize}px "Arial Bold"`;
+    nextState = 'titleScreen'
 }
 
 
 function gameLoop(timestamp) {
+    frameCount++;
+    let scale = wWidth / 1980;
     delta = timestamp - lastFrame;
     elapsedTime +=delta;
     tickElapsedTime +=delta;
@@ -66,18 +82,62 @@ function gameLoop(timestamp) {
     }
 
     cls();
-    drawGrid();
-    pentomino.draw();
-    if(hints) {
-        pentomino.dropShadow();
-        pentomino.drawShadow();
+
+    if (gameState === 'titleScreen') {
+        
+        let w = title.width;
+        let h = title.height;
+        ctx.drawImage(title, 0, 322 * (Math.floor(tick / 60) % 3), w, 322, wWidth - (frameCount * 7 % (w * scale + wWidth)), wHeight / 10, 
+                      w * scale, 322 * scale);
+         w = startButton.width;
+        h = startButton.height;
+        ctx.drawImage(startButton, wWidth / 2 - w * scale / 2, wHeight * 0.7, w * scale, h * scale);
+        ctx.drawImage(cursor, mouseX - 32, mouseY - 32);
     }
-     
-    ctx.fillStyle = 'rgb(20, 20, 20)';     
-    ctx.fillText(`SCORE: ${score}`, 30, fontSize)     
-    ctx.fillText(`LINES: ${linesCount}`, 30, 2 * fontSize)
-    ctx.fillText(`LEVEL: ${level}`, 30, 3 * fontSize)
-    ctx.fillText('NEXT: ', wWidth - 6* fontSize, fontSize)
+
+    if (gameState != 'titleScreen' && gameState != 'loading') {
+        drawGrid();
+        pentomino.draw();
+        if(hints) {
+            pentomino.dropShadow();
+            pentomino.drawShadow();
+        }
+        
+        ctx.drawImage(textSheet, 0, 0, 125, 27, 30 * scale, 10 * scale, 125 * scale, 27 * scale);
+        let s = score.toString();
+        let count = 0;
+        for (char of s) {
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32, 10 * scale, 32 * scale, 27 * scale);
+            count++;
+        }
+
+        s = linesCount.toString();
+        count = 0;
+        ctx.drawImage(textSheet, 0, 30, 120, 27, 30 * scale, 50 * scale, 120 * scale, 27 * scale);
+        for (char of s) {
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 155 * scale + count * 32, 50 * scale, 32 * scale, 27 * scale);
+            count++;
+        }
+
+        s = level.toString();
+        count = 0;
+        ctx.drawImage(textSheet, 0, 60, 125, 27, 30 * scale, 90 * scale, 125 * scale, 27 * scale);
+        for (char of s) {
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32, 90 * scale, 32 * scale, 27 * scale);
+            count++;
+        }
+
+        ctx.drawImage(textSheet, 0, 90, 120, 27, wWidth - 6 * fontSize * scale, 10 * scale, 120 * scale, 27 * scale)
+
+
+        // ctx.fillStyle = 'rgb(20, 20, 20)';     
+        // ctx.fillText(`SCORE: ${score}`, 30, fontSize)     
+        // ctx.fillText(`LINES: ${linesCount}`, 30, 2 * fontSize)
+        // ctx.fillText(`LEVEL: ${level}`, 30, 3 * fontSize)
+        // ctx.fillText('NEXT: ', wWidth - 6* fontSize, fontSize)
+    }
+
+    
     
 
     if (gameState === 'paused') {
@@ -90,6 +150,7 @@ function gameLoop(timestamp) {
         ctx.fillText('PAUSED', wWidth / 2 - w / 2, wHeight / 2 + 25);
         ctx.restore();
     }
+
 
     if (gameState === 'gameOver') {
         ctx.save();
@@ -133,6 +194,8 @@ function gameLoop(timestamp) {
     }
 
     if (gameState === 'playing') {
+        checkKeyInput();
+
         if (pentomino.currentPiece === null) {
             pentomino.selectNewPiece();
         }
@@ -199,12 +262,19 @@ function gameLoop(timestamp) {
         pentomino.shadowY = pentomino.currentY;
     }
     gameState = nextState;
-    requestAnimationFrame(gameLoop);
+    window.requestAnimationFrame(gameLoop);
 }
 
 function cls() {
     ctx.save();
-    ctx.fillStyle = 'rgba(215, 215, 215, .7)';
+    switch (gameState) {
+        case 'titleScreen':
+            ctx.fillStyle = 'rgba(80, 0, 0)'; 
+        break;
+        default:
+            ctx.fillStyle = 'rgba(215, 215, 215, .7)';
+    }
+       
     ctx.fillRect(0,0, wWidth, wHeight);
     ctx.restore();
 }
@@ -227,10 +297,6 @@ function drawGrid() {
             if ((grid[y * COLS + x]) != null) {
 
                 ctx.drawImage(blocks, grid[y * COLS + x] * 32, 0, 32, 32, pentomino.originX + x * cellSize, pentomino.originY + y * cellSize, cellSize, cellSize);
-                // ctx.save();
-                // ctx.fillStyle = pentomino.colors[grid[y * COLS + x]];
-                // ctx.fillRect(pentomino.originX + x * cellSize, pentomino.originY + y * cellSize, cellSize - 1, cellSize - 1);
-                // ctx.restore();
             }
            
         }
@@ -258,36 +324,31 @@ function restartGame() {
     
 }
 
-function keyPressed(e) {
-    let code = e.keyCode;
-    switch(code) {
-        case 37: //Left Arrow
-            if (gameTick && pentomino.fits(pentomino.currentX-1, pentomino.currentY, pentomino.rotation)) {
+
+function checkKeyInput() {
+
+        //Left Arrow
+        if (keys[37] && pentomino.fits(pentomino.currentX-1, pentomino.currentY, pentomino.rotation)) {
                 pentomino.currentX--;
                 pentomino.shadowX--;
-                gameTick = false;
-            }
-        break;
-        case 39: //Right Arrow    
-        if (gameTick && pentomino.fits(pentomino.currentX+1, pentomino.currentY, pentomino.rotation)) {
+        }
+        
+        //Right Arrow    
+        if (keys[39] && pentomino.fits(pentomino.currentX+1, pentomino.currentY, pentomino.rotation)) {
             pentomino.currentX++;
             pentomino.shadowX++;
-            gameTick = false;
             }
-        break;
-        case 38: //Up Arrow
-            if (!keyHold && pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation+1)) {
+         //Up Arrow
+            if (keys[38] && !keyHold && pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation+1)) {
             pentomino.rotation++;
             keyHold = true;
             }
-        break;
-        case 40: //Down Arrow
-            if (gameTick && pentomino.fits(pentomino.currentX, pentomino.currentY+1, pentomino.rotation)) {
+        //Down Arrow
+            if (keys[40] && pentomino.fits(pentomino.currentX, pentomino.currentY+1, pentomino.rotation)) {
             pentomino.currentY++;
-            gameTick = false;
             }
-        break;
-        case 80: //P
+        //P
+        if(keys[80]) {
             if (gameState === 'playing') {
                 nextState = 'paused';
             } else if (gameState === 'paused')
@@ -295,13 +356,29 @@ function keyPressed(e) {
                nextState = 'playing'
                
             }
-        break;
-        case 72: //H
-            hints = !hints;
-        break;
-        case 32: //SPACE
-            pentomino.dropSelf();
-        break;
+        }
+
+        //H
+        if (keys[72]) hints = !hints;
+        
+       //SPACE
+        if (keys[32]) pentomino.dropSelf();
+    keys = [];
+}
+
+function handleClick() {
+
+    if (gameState === 'gameOver') {
+        lastTick = tick;
+        restartGame();
+    }
+
+    if (gameState === 'titleScreen') {
+        if ((mouseX > wWidth / 2 - startButton.width / 2) && (mouseX < wWidth / 2 + startButton.width / 2) 
+            && (mouseY > wHeight * 0.7) / 2 && (mouseY < wHeight * 0.7 + startButton.height)) {
+                pentomino.selectNewPiece();
+                nextState = 'playing';
+        }
     }
 }
 
@@ -317,7 +394,16 @@ function resize() {
     ctx.font = `${fontSize}px "Arial Bold"`;
 }
 
-window.addEventListener('keydown', keyPressed);
+function assetLoader() {
+    resCount++;
+    if (resCount === 5) {
+        setup();
+        window.requestAnimationFrame(gameLoop);
+    }
+}
+
+window.addEventListener('keydown', (e) => keys[e.keyCode] = true);
 window.addEventListener('keyup', () => keyHold = false);
-window.addEventListener('click', () => { lastTick = tick; restartGame() } );
+window.addEventListener('click', handleClick);
 window.addEventListener('resize', resize);
+window.addEventListener('mousemove', (e) => { mouseX = e.pageX; mouseY = e.pageY})
