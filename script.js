@@ -25,15 +25,21 @@ let linesCount = 0;
 let fontSize;
 let score = 0;
 let level = 1;
-let gameState = 'playing';
-let nextState = 'playing';
+let gameState = 'loading';
+let nextState = 'loading';
 let keyHold = false;
 let gameTick = true;
 let hints = true;
 let advanceLevel = false;
 let blocks = new Image();
 blocks.src = './res/blocks.png';
-
+let resCount = 0;
+blocks.onload = () => {
+    resCount++;
+    if (resCount === 1) {
+        nextState = 'playing';
+    }
+}
 
 setup();
 pentomino.selectNewPiece();
