@@ -26,6 +26,7 @@ let linesCount = 0;
 let fontSize;
 let score = 0;
 let level = 1;
+let scale;
 let gameState = 'loading';
 let nextState = 'loading';
 let keyHold = false;
@@ -54,6 +55,7 @@ textSheet.src = './res/text.png';
 textSheet.onload = assetLoader();
 
 function setup() {
+    scale = wWidth / 1980;
     wWidth = gameWindow.width = window.innerWidth;
     wHeight = gameWindow.height = window.innerHeight; 
     cellSize = Math.floor(wHeight * 0.95 / ROWS);
@@ -68,8 +70,8 @@ function setup() {
 
 
 function gameLoop(timestamp) {
+    scale = wWidth / 1980;
     frameCount++;
-    let scale = wWidth / 1980;
     delta = timestamp - lastFrame;
     elapsedTime +=delta;
     tickElapsedTime +=delta;
@@ -87,7 +89,7 @@ function gameLoop(timestamp) {
         
         let w = title.width;
         let h = title.height;
-        ctx.drawImage(title, 0, 322 * (Math.floor(tick / 60) % 3), w, 322, wWidth - (frameCount * 7 % (w * scale + wWidth)), wHeight / 10, 
+        ctx.drawImage(title, 0, 322 * (Math.floor(tick / 60) % 3), w, 322, wWidth - (frameCount * 6 % (w * scale + wWidth)), wHeight / 10, 
                       w * scale, 322 * scale);
          w = startButton.width;
         h = startButton.height;
@@ -103,64 +105,64 @@ function gameLoop(timestamp) {
             pentomino.drawShadow();
         }
         
-        ctx.drawImage(textSheet, 0, 0, 125, 27, 30 * scale, 10 * scale, 125 * scale, 27 * scale);
+        ctx.drawImage(textSheet, 0, 0, 127, 27, 30 * scale, 20 * scale, 127 * scale, 27 * scale);
         let s = score.toString();
         let count = 0;
         for (char of s) {
-            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32, 10 * scale, 32 * scale, 27 * scale);
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 175 * scale + count * 32, 20 * scale, 32 * scale, 27 * scale);
             count++;
         }
 
         s = linesCount.toString();
         count = 0;
-        ctx.drawImage(textSheet, 0, 30, 120, 27, 30 * scale, 50 * scale, 120 * scale, 27 * scale);
+        ctx.drawImage(textSheet, 0, 30, 122, 27, 30 * scale, 70 * scale, 122 * scale, 27 * scale);
         for (char of s) {
-            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 155 * scale + count * 32, 50 * scale, 32 * scale, 27 * scale);
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32, 70 * scale, 32 * scale, 27 * scale);
             count++;
         }
 
         s = level.toString();
         count = 0;
-        ctx.drawImage(textSheet, 0, 60, 125, 27, 30 * scale, 90 * scale, 125 * scale, 27 * scale);
+        ctx.drawImage(textSheet, 0, 60, 127, 27, 30 * scale, 120 * scale, 127 * scale, 27 * scale);
         for (char of s) {
-            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32, 90 * scale, 32 * scale, 27 * scale);
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 175 * scale + count * 32, 120 * scale, 32 * scale, 27 * scale);
             count++;
         }
 
-        ctx.drawImage(textSheet, 0, 90, 120, 27, wWidth - 6 * fontSize * scale, 10 * scale, 120 * scale, 27 * scale)
+        ctx.drawImage(textSheet, 0, 90, 122, 27, wWidth - 6 * fontSize * scale, 10 * scale, 122 * scale, 27 * scale)
 
-
-        // ctx.fillStyle = 'rgb(20, 20, 20)';     
-        // ctx.fillText(`SCORE: ${score}`, 30, fontSize)     
-        // ctx.fillText(`LINES: ${linesCount}`, 30, 2 * fontSize)
-        // ctx.fillText(`LEVEL: ${level}`, 30, 3 * fontSize)
-        // ctx.fillText('NEXT: ', wWidth - 6* fontSize, fontSize)
     }
 
     
     
 
     if (gameState === 'paused') {
+        checkKeyInput();
         ctx.save();
+        ctx.fillStyle = 'rgba(25, 25, 25)';
+        ctx.fillRect(pentomino.originX + cellSize, pentomino.originY, cellSize * (COLS - 2), cellSize * (ROWS - 1));
         ctx.font = 'bold 100px "Arial Bold"';
         ctx.fillStyle = 'rgba(0, 0, 0, .5)'
         ctx.fillRect(wWidth / 2 - wWidth / 6, wHeight / 2 - wHeight / 6, wWidth / 3, wHeight / 3)
         let w = ctx.measureText('PAUSED').width;
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.fillText('PAUSED', wWidth / 2 - w / 2, wHeight / 2 + 25);
+        
         ctx.restore();
     }
 
 
     if (gameState === 'gameOver') {
-        ctx.save();
-        ctx.font = 'bold 100px "Arial Bold"';
-        ctx.fillStyle = 'rgba(0, 0, 0, .5)'
-        ctx.fillRect(wWidth / 2 - wWidth / 4, wHeight / 2 - wHeight / 6, wWidth / 2, wHeight / 3)
-        let w = ctx.measureText('GAME  OVER').width;
-        ctx.fillStyle = 'rgb(255, 255, 255)';
-        ctx.fillText('GAME OVER', wWidth / 2 - w / 2, wHeight / 2 + 25);
-        ctx.restore();
+
+        ctx.drawImage(textSheet, 0, 160, 875, 105, wWidth / 2 - 437 * scale, wHeight / 2 - 52 * scale, 875 * scale, 105 * scale);
+        // ctx.save();
+        // ctx.font = 'bold 100px "Arial Bold"';
+        // ctx.fillStyle = 'rgba(0, 0, 0, .5)'
+        // ctx.fillRect(wWidth / 2 - wWidth / 4, wHeight / 2 - wHeight / 6, wWidth / 2, wHeight / 3)
+        // let w = ctx.measureText('GAME  OVER').width;
+        // ctx.fillStyle = 'rgb(255, 255, 255)';
+        // ctx.fillText('GAME OVER', wWidth / 2 - w / 2, wHeight / 2 + 25);
+        // ctx.restore();
     }
     
 
@@ -180,9 +182,12 @@ function gameLoop(timestamp) {
 
         if(tick - lastTick === 10) {
             fullLines.forEach(line => {
-                for (let px = 1; px < COLS -1; px ++) {                     
-                        grid[line * COLS + px] = grid[(line - 1) * COLS + px];
-                        grid[px] = null;    
+                for (let px = 1; px < COLS -1; px ++) {
+                    for (let py = line; py > 0; py--) {
+                        grid[py * COLS + px] = grid[(py - 1) * COLS + px];
+                        grid[px] = null; 
+                    }                     
+   
                 }
             });
             
@@ -269,10 +274,10 @@ function cls() {
     ctx.save();
     switch (gameState) {
         case 'titleScreen':
-            ctx.fillStyle = 'rgba(80, 0, 0)'; 
+            ctx.fillStyle = `rgba(${80 + 20 * Math.sin(frameCount / 60)}, 0, 0)`; 
         break;
         default:
-            ctx.fillStyle = 'rgba(215, 215, 215, .7)';
+            ctx.fillStyle = `rgba(20, 20, 20, .5)`;
     }
        
     ctx.fillRect(0,0, wWidth, wHeight);
@@ -320,49 +325,64 @@ function restartGame() {
 
         pentomino.currentPiece = null;
         lastTick = tick;
-        nextState = 'restart';
+        nextState = 'titleScreen';
     
 }
 
 
 function checkKeyInput() {
 
+    if (gameState != 'paused') {
         //Left Arrow
         if (keys[37] && pentomino.fits(pentomino.currentX-1, pentomino.currentY, pentomino.rotation)) {
-                pentomino.currentX--;
-                pentomino.shadowX--;
+            pentomino.currentX--;
+            pentomino.shadowX--;
+    }
+    
+    //Right Arrow    
+    if (keys[39] && pentomino.fits(pentomino.currentX+1, pentomino.currentY, pentomino.rotation)) {
+        pentomino.currentX++;
+        pentomino.shadowX++;
         }
-        
-        //Right Arrow    
-        if (keys[39] && pentomino.fits(pentomino.currentX+1, pentomino.currentY, pentomino.rotation)) {
-            pentomino.currentX++;
-            pentomino.shadowX++;
-            }
-         //Up Arrow
-            if (keys[38] && !keyHold && pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation+1)) {
-            pentomino.rotation++;
-            keyHold = true;
-            }
-        //Down Arrow
-            if (keys[40] && pentomino.fits(pentomino.currentX, pentomino.currentY+1, pentomino.rotation)) {
-            pentomino.currentY++;
-            }
-        //P
-        if(keys[80]) {
-            if (gameState === 'playing') {
-                nextState = 'paused';
-            } else if (gameState === 'paused')
-            {
-               nextState = 'playing'
-               
-            }
+     //Up Arrow
+        if (keys[38] && !keyHold && pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation+1)) {
+        pentomino.rotation++;
+        keyHold = true;
         }
+    //Down Arrow
+        if (keys[40] && pentomino.fits(pentomino.currentX, pentomino.currentY+1, pentomino.rotation)) {
+        pentomino.currentY++;
+        }
+    //P
+    if(keys[80]) {
+        if (gameState === 'playing') {
+            nextState = 'paused';
+        } else if (gameState === 'paused')
+        {
+           nextState = 'playing'
+           
+        }
+    }
 
-        //H
-        if (keys[72]) hints = !hints;
-        
-       //SPACE
-        if (keys[32]) pentomino.dropSelf();
+    //H
+    if (keys[72]) hints = !hints;
+    
+   //SPACE
+    if (keys[32]) pentomino.dropSelf();
+ 
+    
+    }
+
+    if(keys[80]) {
+        if (gameState === 'playing') {
+            nextState = 'paused';
+        } else if (gameState === 'paused')
+        {
+           nextState = 'playing'
+           
+        }
+    }
+    
     keys = [];
 }
 
@@ -392,6 +412,7 @@ function resize() {
     pentomino.originY = Math.floor((wHeight - gameHeight) / 2);
     fontSize = cellSize;
     ctx.font = `${fontSize}px "Arial Bold"`;
+    scale = wWidth / 1980;
 }
 
 function assetLoader() {

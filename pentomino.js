@@ -82,23 +82,18 @@ class Pentomino {
                         
                         ctx.drawImage(blocks, this.currentPiece * 32, 0, 32, 32, this.originX + (this.currentX + px) * cellSize, 
                                       this.originY + (this.currentY + py)* cellSize, cellSize, cellSize);
-                        
-                        // ctx.save();
-                        // ctx.fillStyle = this.colors[this.currentPiece];
-                        // ctx.fillRect(this.originX + (this.currentX + px) * cellSize +1, this.originY + (this.currentY + py)* cellSize+1, this.innerSize, this.innerSize);
-                        // ctx.restore();
+                      
                     }
                 }
             }
         }
-        ctx.fillStyle = 'rgba(255,255,255, 0.5)';
-        ctx.fillRect(wWidth - 7 * cellSize, cellSize * 2, 5 * cellSize, 5 * cellSize);
+       
         for (let px = 0; px < 5; px ++) {
             for (let py = 0; py < 5; py ++) {
 
                 if (this.pentominos[this.nextPiece][this.rotate(px, py, 0)] === 'X') {
-                    ctx.drawImage(blocks, this.nextPiece * 32, 0, 32, 32, wWidth - 7 * cellSize +  px * cellSize, 
-                                   cellSize * 2 + py * cellSize, cellSize, cellSize)
+                    ctx.drawImage(blocks, this.nextPiece * 32, 0, 32, 32, wWidth - 7 * cellSize * scale +  px * cellSize * scale, 
+                                   cellSize * scale * 2 + py * cellSize * scale, cellSize * scale, cellSize * scale)
                 }
             }
         }         
