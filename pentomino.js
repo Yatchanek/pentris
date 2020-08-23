@@ -1,5 +1,5 @@
 class Pentomino {
-    constructor(cellSize, originX, originY) {
+    constructor(originX, originY) {
         this.pentominos = [
             '..X....X....X....X....X..',
             '......XXX...X....X.......',
@@ -21,38 +21,10 @@ class Pentomino {
             '......XXX..X....X........'
         ]
 
-        // this.colors = [
-        //     'rgb(179, 0, 0)',
-        //     'rgb(50, 100, 0)',
-        //     'rgb(0, 128, 255)',
-        //     'rgb(255, 255, 0)',
-        //     'rgb(179, 0, 179)',
-        //     'rgb(255, 153, 51)',
-        //     'rgb(57, 172, 115)',
-        //     'rgb(153, 0, 255)',
-        //     'rgb(255, 80, 80',
-        //     'rgb(194, 194, 214)',
-        //     'rgb(230, 77, 0)',
-        //     'rgb(68, 204, 0)',
-        //     'rgba(179, 0, 0)',
-        //     'rgba(50, 100, 0)',
-        //     'rgba(179, 0, 0)',
-        //     'rgba(50, 100, 0)',
-        //     'rgba(179, 0, 0)',
-        //     'rgba(50, 100, 0)',
-        //     'rgba(179, 0, 0)',
-        //     'rgba(179, 0, 0)',
-        //     'rgba(255, 255, 255)',
-        // ]
         this.originX = originX;
         this.originY = originY;
         this.currentPiece = null;
         this.nextPiece = null;
-        this.rotation = 0;
-        this.currentX = COLS / 2;
-        this.currentY = 0;
-        this.shadowX = this.currentX;
-        this.shadowY = this.currentY;
     }
 
     rotate(px, py, r) {
@@ -159,7 +131,7 @@ class Pentomino {
     }
 
     dropShadow() {
-        while(this.currentPiece !=null && this.fits(this.shadowX, this.shadowY + 1, this.rotation)) {
+        while(this.currentPiece !=null && this.fits(this.currentX, this.shadowY + 1, this.rotation)) {
             this.shadowY++;
         }
     }
