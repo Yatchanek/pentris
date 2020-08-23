@@ -163,7 +163,6 @@ function gameLoop(timestamp) {
 
 
     if (gameState === 'gameOver') {
-
         ctx.drawImage(textSheet, 0, 160, 875, 105, wWidth / 2 - 437 * scale, wHeight / 2 - 52 * scale, 875 * scale, 105 * scale);
 
     }
@@ -209,6 +208,7 @@ function gameLoop(timestamp) {
         }
 
         if (!pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation)) {
+            
             nextState = 'gameOver';
         } 
      
@@ -314,6 +314,7 @@ function drawGrid() {
 
 function restartGame() {
     score = 0;
+    lines = 0;
     level = 1;
     for (let x = 1; x < COLS - 1; x++) {
   
@@ -327,6 +328,8 @@ function restartGame() {
    }
 
         pentomino.currentPiece = null;
+        pentomino.nextPiece = null;
+        pentomino.selectNewPiece();
         lastTick = tick;
         nextState = 'titleScreen';
     
@@ -392,7 +395,6 @@ function checkKeyInput() {
 function handleClick() {
 
     if (gameState === 'gameOver') {
-        lastTick = tick;
         restartGame();
     }
 
