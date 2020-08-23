@@ -32,7 +32,10 @@ let nextState = 'loading';
 let keyHold = false;
 let gameTick = true;
 let hints = true;
+let hintsAllowed = false;
+let hardCoreMode = false;
 let advanceLevel = false;
+let playing = false;
 let resCount = 0;
 let blocks = new Image();
 let title = new Image();
@@ -79,36 +82,82 @@ function gameLoop(timestamp) {
     lastFrame = timestamp;
 
     if (tickElapsedTime > 50) {
-        gameTick = true;
         tickElapsedTime = 0;
         tick++;
+        gameTick = true;
     }
-
     cls();
 
     if (gameState === 'titleScreen') {
-        
+        playing = false;
         let w = title.width;``
         let h = title.height;
+        //Title
         ctx.save();
         ctx.transform(1, 0, 0, 1, (wWidth - w * scale) / 6 * Math.sin(elapsedTime / 3000) , wHeight * 0.02 * Math.cos(elapsedTime/750));
         ctx.drawImage(title, 0, 322 * (Math.floor(tick / 60) % 3), w, 322, (wWidth - w * scale) / 2, wHeight / 10 * scale, 
                        w * scale, 322 * scale);
         ctx.restore();
-        w = startButton.width;
-        h = startButton.height;
 
-        if (mouseX > (wWidth - w * scale) / 2 && mouseX < (wWidth + w * scale) / 2 
-            && mouseY > wHeight * 0.7 && mouseY < wHeight * 0.7 + h * scale) {
+        //Start Game Button Animation
+        if (mouseX > (wWidth - 476 * scale) / 2 && mouseX < (wWidth + 476 * scale) / 2 
+            && mouseY > wHeight * 0.7 && mouseY < wHeight * 0.7 + 90 * scale) {
                 scale += 0.05 * Math.sin(elapsedTime/150)
             }
-        ctx.drawImage(startButton, (wWidth - w * scale) / 2, wHeight * 0.7, w * scale, h * scale);
-        
+        ctx.drawImage(textSheet, 300, 0, 476, 95, (wWidth - 476 * scale) / 2, wHeight * 0.7, 476 * scale, 90 * scale);
+                
         ctx.drawImage(cursor, mouseX - 32, mouseY - 32);
     }
 
-    if (gameState != 'titleScreen' && gameState != 'loading') {
+    if (gameState === 'modeSelect') {
+        let w = title.width;
+        let h = title.height;
+        let normalHover;
+        let hardCoreHover;
+        ctx.save();
+        //Title
+        ctx.transform(1, 0, 0, 1, (wWidth - w * scale) / 6 * Math.sin(elapsedTime / 3000) , wHeight * 0.02 * Math.cos(elapsedTime/750));
+        ctx.drawImage(title, 0, 322 * (Math.floor(tick / 60) % 3), w, 322, (wWidth - w * scale) / 2, wHeight / 10 * scale, 
+                       w * scale, 322 * scale);
+        ctx.restore();
+
+        //Select game mode
+        ctx.drawImage(textSheet, 0, 300, 935, 100, (wWidth - 935 * scale) / 2, wHeight * 0.55, 935 * scale, 100 * scale);
+      
+        //Hover animations
+        if ((mouseY > wHeight * 0.75 && mouseY < wHeight * 0.75 + 55 * scale) && 
+            (mouseX > wWidth / 2 - 285 * scale - wWidth / 8 && mouseX < wWidth / 2 - wWidth / 8)) {
+                scale += 0.05 * Math.sin(elapsedTime/150);
+                normalHover = true; 
+            }
+        ctx.drawImage(textSheet, 0, 420, 285, 55, wWidth / 2 - 285 * scale - wWidth / 8, wHeight * 0.75, 285 * scale, 55 * scale);
+        
+        scale = wWidth / sWidth;  
+        
+        if ((mouseY > wHeight * 0.75 && mouseY < wHeight * 0.75 + 55 * scale) &&
+           (mouseX > wWidth / 2 + wWidth / 8 && mouseX < wWidth / 2 + wWidth / 8 + 366 * scale)) {
+                scale += 0.05 * Math.sin(elapsedTime/150);
+                hardCoreHover = true;
+           }
+           
+           ctx.drawImage(textSheet, 300, 420, 366, 55, wWidth / 2 + wWidth / 8, wHeight * 0.75, 366 * scale, 55 * scale);
+
+           scale = wWidth / sWidth;
+
+        //Mode explanation
+        if (normalHover) {
+            ctx.drawImage(textSheet, 350, 100, 225, 55, wWidth / 2 - 285 * scale - wWidth / 8, wHeight * 0.75 + 80 * scale, 225 * scale, 55 * scale);
+        }
+        if (hardCoreHover) {
+            ctx.drawImage(textSheet, 600, 100, 285, 55, wWidth / 2 + wWidth / 8, wHeight * 0.75 + 80 * scale, 285 * scale, 55 * scale);
+        }
+
+        ctx.drawImage(cursor, mouseX - 32, mouseY - 32);
+    }
+
+    if (playing) {
         drawGrid();
+        checkKeyInput();
         pentomino.draw();
         if(hints) {
             pentomino.dropShadow();
@@ -147,9 +196,8 @@ function gameLoop(timestamp) {
     
 
     if (gameState === 'paused') {
-        checkKeyInput();
         ctx.save();
-        ctx.fillStyle = 'rgba(25, 25, 25)';
+        ctx.fillStyle = `rgba(16, 25, 41, 1)`;
         ctx.fillRect(pentomino.originX + cellSize, pentomino.originY, cellSize * (COLS - 2), cellSize * (ROWS - 1));
         ctx.font = 'bold 100px "Arial Bold"';
         ctx.fillStyle = 'rgba(0, 0, 0, .5)'
@@ -164,7 +212,7 @@ function gameLoop(timestamp) {
 
     if (gameState === 'gameOver') {
         ctx.drawImage(textSheet, 0, 160, 875, 105, wWidth / 2 - 437 * scale, wHeight / 2 - 52 * scale, 875 * scale, 105 * scale);
-
+        
     }
     
 
@@ -201,7 +249,6 @@ function gameLoop(timestamp) {
     }
 
     if (gameState === 'playing') {
-        checkKeyInput();
 
         if (pentomino.currentPiece === null) {
             pentomino.selectNewPiece();
@@ -211,8 +258,7 @@ function gameLoop(timestamp) {
             
             nextState = 'gameOver';
         } 
-     
-    
+        
         if (elapsedTime > speed) {
             elapsedTime = 0;
             
@@ -235,8 +281,14 @@ function gameLoop(timestamp) {
                 for (let py = 0; py < 5; py++) {
                         if (pentomino.currentY + py < ROWS - 1) {
                             let isLine = true;
+                            if(!emptyPieceLine(py)) {
                             for (let px = 1; px < COLS - 1; px++) {
-                                isLine &= grid[(pentomino.currentY + py) * COLS + px] !=null;
+                                
+                                    isLine &= grid[(pentomino.currentY + py) * COLS + px] !=null;
+                                }
+                            }
+                            else {
+                                isLine = false;
                             }
                             if(isLine) {
                                 fullLines.push(pentomino.currentY + py);
@@ -269,7 +321,21 @@ function gameLoop(timestamp) {
            
         }
         pentomino.shadowY = pentomino.currentY;
+
+        if (hardCoreMode && gameTick && tick % 750 === 0 && Math.random() < 0.3) {
+            for (py = 0; py < ROWS - 1; py++) {
+                for (px = 1; px < COLS - 1; px++) {
+                    grid[py * COLS + px] = grid[(py + 1) * COLS + px]
+                }
+            }
+    
+            for (let px = 1; px < COLS -1; px ++) {                       
+                grid[(ROWS - 2) * COLS + px] = Math.random() < 0.33 ? null : Math.floor(Math.random() * 18);
+            }
+            gameTick = false;
+        }
     }
+
     gameState = nextState;
     window.requestAnimationFrame(gameLoop);
 }
@@ -288,6 +354,15 @@ function cls() {
     ctx.restore();
 }
 
+function emptyPieceLine(py) {
+    let count = 0;
+    for(px = 0; px < 5; px++) {
+        if (pentomino.pentominos[pentomino.currentPiece][pentomino.rotate(px, py, pentomino.rotation)] === '.') {
+            count++;
+        }
+    }
+    return (count === 5);
+}
 
 function createGrid() { 
     for (let x = 0; x < COLS; x++) {
@@ -330,6 +405,9 @@ function restartGame() {
 
         pentomino.currentPiece = null;
         pentomino.nextPiece = null;
+        hardCoreMode = false;
+        hintsAllowed = false;
+        hints = true;
         pentomino.selectNewPiece();
         lastTick = tick;
         nextState = 'titleScreen';
@@ -339,7 +417,7 @@ function restartGame() {
 
 function checkKeyInput() {
 
-    if (gameState != 'paused') {
+    if (gameState != 'paused' && gameState != 'titleScreen') {
         //Left Arrow
         if (keys[37] && !pentomino.dropped && pentomino.fits(pentomino.currentX-1, pentomino.currentY, pentomino.rotation)) {
             pentomino.currentX--;
@@ -370,10 +448,12 @@ function checkKeyInput() {
     }
 
     //H
-    if (keys[72]) hints = !hints;
+    if (keys[72] && hintsAllowed) hints = !hints;
     
    //SPACE
-    if (keys[32]) pentomino.dropSelf();
+    if (keys[32]) {
+        pentomino.dropSelf();
+    }
  
     
     }
@@ -388,6 +468,10 @@ function checkKeyInput() {
         }
     }
     
+    if (gameState === 'gameOver' && keys.length) {
+        restartGame();
+    }
+
     keys = [];
 }
 
@@ -400,9 +484,27 @@ function handleClick() {
     if (gameState === 'titleScreen') {
         if ((mouseX > wWidth / 2 - startButton.width / 2) && (mouseX < wWidth / 2 + startButton.width / 2) 
             && (mouseY > wHeight * 0.7) / 2 && (mouseY < wHeight * 0.7 + startButton.height)) {
-                pentomino.selectNewPiece();
-                nextState = 'playing';
+                
+                nextState = 'modeSelect';
         }
+    }
+
+    if (gameState === 'modeSelect') {
+
+        if ((mouseY > wHeight * 0.75 && mouseY < wHeight * 0.75 + 55 * scale) && 
+            (mouseX > wWidth / 2 - 285 * scale - wWidth / 8 && mouseX < wWidth / 2 - wWidth / 8)) {
+                hardCoreMode = false;
+                hintsAllowed = true;
+            }
+            if ((mouseY > wHeight * 0.75 && mouseY < wHeight * 0.75 + 55 * scale) &&
+            (mouseX > wWidth / 2 + wWidth / 8 && mouseX < wWidth / 2 + wWidth / 8 + 366 * scale)) {
+                hardCoreMode = true;
+                hints = false;
+                hintsAllowed = false;
+            }
+        pentomino.selectNewPiece();
+        playing = true;
+        nextState = 'playing';
     }
 }
 

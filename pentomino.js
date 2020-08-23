@@ -80,7 +80,7 @@ class Pentomino {
                         ctx.save();
                         ctx.strokeStyle = 'rgba(150, 150, 150, .5)'; //this.colors[this.currentPiece];
                         ctx.lineWidth = 1;
-                        ctx.strokeRect(this.originX + (this.currentX + px) * cellSize, this.originY + (this.shadowY + py)* cellSize, cellSize, cellSize);
+                        ctx.strokeRect(this.originX + (this.currentX + px) * cellSize, this.originY + (this.shadowY + py)* cellSize, cellSize - 4, cellSize - 4);
                         ctx.restore();
                     }
                 }
