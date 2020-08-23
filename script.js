@@ -223,6 +223,7 @@ function gameLoop(timestamp) {
             
             else {
                 score +=10;
+                pentomino.dropped = true;
                 for (let px = 0; px < 5; px ++) {
                     for (let py = 0; py < 5; py ++) {
                         if (pentomino.pentominos[pentomino.currentPiece][pentomino.rotate(px, py, pentomino.rotation)] === 'X') {
@@ -280,7 +281,7 @@ function cls() {
             ctx.fillStyle = `rgba(${80 + 20 * Math.sin(frameCount / 60)}, 0, 0)`; 
         break;
         default:
-            ctx.fillStyle = `rgba(20, 20, 20, .5)`;
+            ctx.fillStyle = `rgba(16, 25, 41, 1)`;
     }
        
     ctx.fillRect(0,0, wWidth, wHeight);
@@ -314,7 +315,7 @@ function drawGrid() {
 
 function restartGame() {
     score = 0;
-    lines = 0;
+    linesCount = 0;
     level = 1;
     for (let x = 1; x < COLS - 1; x++) {
   
@@ -340,18 +341,16 @@ function checkKeyInput() {
 
     if (gameState != 'paused') {
         //Left Arrow
-        if (keys[37] && pentomino.fits(pentomino.currentX-1, pentomino.currentY, pentomino.rotation)) {
+        if (keys[37] && !pentomino.dropped && pentomino.fits(pentomino.currentX-1, pentomino.currentY, pentomino.rotation)) {
             pentomino.currentX--;
-            pentomino.shadowX--;
     }
     
     //Right Arrow    
-    if (keys[39] && pentomino.fits(pentomino.currentX+1, pentomino.currentY, pentomino.rotation)) {
+    if (keys[39] && !pentomino.dropped && pentomino.fits(pentomino.currentX+1, pentomino.currentY, pentomino.rotation)) {
         pentomino.currentX++;
-        pentomino.shadowX++;
         }
      //Up Arrow
-        if (keys[38] && !keyHold && pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation+1)) {
+        if (keys[38] && !pentomino.dropped && !keyHold && pentomino.fits(pentomino.currentX, pentomino.currentY, pentomino.rotation+1)) {
         pentomino.rotation++;
         keyHold = true;
         }

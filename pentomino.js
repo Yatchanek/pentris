@@ -25,6 +25,7 @@ class Pentomino {
         this.originY = originY;
         this.currentPiece = null;
         this.nextPiece = null;
+        this.dropped = false;
     }
 
     rotate(px, py, r) {
@@ -72,14 +73,14 @@ class Pentomino {
     }
 
     drawShadow() {
-        if (this.currentPiece != null) {
+        if (this.currentPiece != null && !this.dropped) {
             for (let px = 0; px < 5; px ++) {
                 for (let py = 0; py < 5; py ++) {
                     if (this.pentominos[this.currentPiece][this.rotate(px, py, this.rotation)] === 'X') {
                         ctx.save();
                         ctx.strokeStyle = 'rgba(150, 150, 150, .5)'; //this.colors[this.currentPiece];
                         ctx.lineWidth = 1;
-                        ctx.strokeRect(this.originX + (this.shadowX + px) * cellSize, this.originY + (this.shadowY + py)* cellSize, cellSize, cellSize);
+                        ctx.strokeRect(this.originX + (this.currentX + px) * cellSize, this.originY + (this.shadowY + py)* cellSize, cellSize, cellSize);
                         ctx.restore();
                     }
                 }
@@ -119,19 +120,21 @@ class Pentomino {
         this.currentPiece = this.nextPiece;
         this.nextPiece = Math.floor(Math.random() * 18);
 
-        this.shadowX = this.currentX = COLS / 2;
+        this.shadowX = this.currentX = COLS / 2 - 1;
         this.shadowY = this.currentY = 0;
         this.rotation = 0;
+        this.dropped = false;
     }
 
     dropSelf() {
         while(this.fits(this.currentX, this.currentY + 1, this.rotation)) {
             this.currentY++;
-        }      
+        }
+        this.droped = true;      
     }
 
     dropShadow() {
-        while(this.currentPiece !=null && this.fits(this.currentX, this.shadowY + 1, this.rotation)) {
+        while(this.currentPiece !=null &&! this.dropped && this.fits(this.currentX, this.shadowY + 1, this.rotation)) {
             this.shadowY++;
         }
     }
