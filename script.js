@@ -88,10 +88,10 @@ function gameLoop(timestamp) {
 
     if (gameState === 'titleScreen') {
         
-        let w = title.width;
+        let w = title.width;``
         let h = title.height;
         ctx.save();
-        ctx.transform(1, 0, 0, 1, (wWidth - w * scale) / 2 * Math.sin(elapsedTime / 1000) , wHeight * 0.05 * Math.cos(elapsedTime/500));
+        ctx.transform(1, 0, 0, 1, (wWidth - w * scale) / 6 * Math.sin(elapsedTime / 3000) , wHeight * 0.02 * Math.cos(elapsedTime/750));
         ctx.drawImage(title, 0, 322 * (Math.floor(tick / 60) % 3), w, 322, (wWidth - w * scale) / 2, wHeight / 10 * scale, 
                        w * scale, 322 * scale);
         ctx.restore();
