@@ -129,6 +129,7 @@ class Pentomino {
     dropSelf() {
         while(this.fits(this.currentX, this.currentY + 1, this.rotation)) {
             this.currentY++;
+            bonus += 0.05;
         }
         this.droped = true;      
     }
