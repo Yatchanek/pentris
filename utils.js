@@ -35,6 +35,7 @@ function checkKeyInput() {
     
    //SPACE
     if (keys[32]) {
+		pentomino.dropped = true;
         pentomino.dropSelf();
     }
  
