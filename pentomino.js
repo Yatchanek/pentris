@@ -120,7 +120,7 @@ class Pentomino {
         this.currentPiece = this.nextPiece;
         this.nextPiece = Math.floor(Math.random() * 18);
 
-        this.shadowX = this.currentX = COLS / 2 - 1;
+        this.shadowX = this.currentX = COLS / 2 - 2;
         this.shadowY = this.currentY = 0;
         this.rotation = 0;
         this.dropped = false;

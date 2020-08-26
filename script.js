@@ -3,12 +3,10 @@ function setup() {
     wWidth = gameWindow.width = window.innerWidth;
     wHeight = gameWindow.height = window.innerHeight; 
     cellSize = Math.floor(wHeight * 0.95 / ROWS);
-    fontSize = cellSize;
     gameHeight = cellSize * ROWS;
     gameWidth = cellSize * COLS;
     pentomino = new Pentomino(Math.floor(wWidth / 2 - gameWidth / 2), Math.floor((wHeight - gameHeight) / 2));
     createGrid();
-    ctx.font = `bold ${fontSize}px "Arial Bold"`;
     nextState = 'titleScreen'
 }
 
@@ -103,6 +101,7 @@ function gameLoop(timestamp) {
     }
 
     if (ongoingPlay) {
+
         drawGrid();
         drawInfo();
         checkKeyInput()
@@ -143,7 +142,6 @@ function gameLoop(timestamp) {
         if(!hardCoreMode && score > nHighScore) {
             nHighScore = score;
         }
-
     }
 
     if (gameState === 'removing') {
@@ -304,6 +302,8 @@ function restartGame() {
     linesCount = 0;
     level = 1;
     bonus = 0;
+    speed = 1000;
+    keys = [];
     for (let x = 1; x < COLS - 1; x++) {  
         for (let y = 0; y < ROWS - 1; y++) {
            grid[y * COLS + x] = null;        
@@ -315,7 +315,6 @@ function restartGame() {
         hardCoreMode = false;
         hintsAllowed = false;
         hints = true;
-      //  highestRow = undefined;
         pentomino.selectNewPiece();
         lastTick = tick;
         nextState = 'titleScreen';   
@@ -332,27 +331,27 @@ function drawInfo() {
     }
 
 
-    ctx.drawImage(textSheet, 0, 0, 127, 27, 30 * scale, 65 * scale, 127 * scale, 27 * scale);
+    ctx.drawImage(textSheet, 0, 0, 127, 27, 30 * scale, 70 * scale, 127 * scale, 27 * scale);
         s = score.toString();
         count = 0;
         for (char of s) {
-            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 175 * scale + count * 32 * scale, 65 * scale, 32 * scale, 27 * scale);
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 175 * scale + count * 32 * scale, 70 * scale, 32 * scale, 27 * scale);
             count++;
         }
 
         s = linesCount.toString();
         count = 0;
-        ctx.drawImage(textSheet, 0, 30, 122, 27, 30 * scale, 115 * scale, 122 * scale, 27 * scale);
+        ctx.drawImage(textSheet, 0, 30, 122, 27, 30 * scale, 120 * scale, 122 * scale, 27 * scale);
         for (char of s) {
-            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32 * scale, 115 * scale, 32 * scale, 27 * scale);
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 165 * scale + count * 32 * scale, 120 * scale, 32 * scale, 27 * scale);
             count++;
         }
 
         s = level.toString();
         count = 0;
-        ctx.drawImage(textSheet, 0, 60, 127, 27, 30 * scale, 165 * scale, 127 * scale, 27 * scale);
+        ctx.drawImage(textSheet, 0, 60, 127, 27, 30 * scale, 170 * scale, 127 * scale, 27 * scale);
         for (char of s) {
-            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 175 * scale + count * 32 * scale, 165 * scale, 32 * scale, 27 * scale);
+            ctx.drawImage(textSheet, +char * 32, 122, 31, 28, 175 * scale + count * 32 * scale, 170 * scale, 32 * scale, 27 * scale);
             count++;
         }
 
